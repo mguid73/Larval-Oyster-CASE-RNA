@@ -138,9 +138,22 @@ Next, I looked at the quality of the reads in each `.fq.gz` file using [MultiQC]
 ```
 mkdir fastqc-raw
 cd fastqc-raw/
-fastqc ../*fq.gz   #started at 4:51pm
+fastqc ../*fq.gz   #took about 1.5-2 hrs for these data
 mv *fastqc.* fastqc-raw/
 cd fastq-raw/
+ls  #the *fastqc* files should all be in the fastq-raw directory now
 multiqc .
 ```
+
+Now I have a `multiqc_report.html` file which I transfered on to my local computer to look at in a web browser. 
+
+There are a couple ways I could have 'transfered' that file over to local. I downloaded it from Visual Studio code's Explorer pane. I could have used the following line to file transfer from KITT to my local computer. This code would be run from my local terminal (not on KITT). Alternatively, I could have used a file transfer software like Cyberduck.
+```
+ls
+scp -P zzzz mguidry@KITT.uri.edu:/home/mguidry/Working-CASE-RNA/fastqc-raw/multiqc_report.html ~/Dropbox/PLOMEE/
+```
+
+Once you have `multiqc_report.html` locally, simply run `open multiqc_report.html` in terminal from the directory that the file is in. This will open the report in your browser.
+
+#### Digging into the raw reads
 
