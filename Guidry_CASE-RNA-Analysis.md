@@ -40,8 +40,14 @@ conda activate CASE-RNA
 
 ## Quality Control and Read Trimming
 Steps:
-1. 
 
+1. 
+2. 
+3. 
+4. 
+
+
+### Set up
 Reads were already de-multiplexed and assigned to each individual sample by [J. Puritz](https://github.com/jpuritz), and linked to a directory called CASE_RNA.
 
  I made a "working" directory to work in, and then linked in the files to that directory.
@@ -146,14 +152,78 @@ multiqc .
 ```
 
 Now I have a `multiqc_report.html` file which I transfered on to my local computer to look at in a web browser. 
-
+_____________________
 There are a couple ways I could have 'transfered' that file over to local. I downloaded it from Visual Studio code's Explorer pane. I could have used the following line to file transfer from KITT to my local computer. This code would be run from my local terminal (not on KITT). Alternatively, I could have used a file transfer software like Cyberduck.
 ```
 ls
-scp -P zzzz mguidry@KITT.uri.edu:/home/mguidry/Working-CASE-RNA/fastqc-raw/multiqc_report.html ~/Dropbox/PLOMEE/
+scp -P zzzz mguidry@KITT.uri.edu:/home/mguidry/Working-CASE-RNA/fastqc-raw/multiqc_report.html ~/Desktop
 ```
-
-Once you have `multiqc_report.html` locally, simply run `open multiqc_report.html` in terminal from the directory that the file is in. This will open the report in your browser.
+______________________
+Once you have `multiqc_report.html` locally, simply run `open multiqc_report.html` in terminal from the directory that the file is in. This will open the report in your browser and from there you can poke around on it looking through the different module reports.
 
 #### Digging into the raw reads
+Here, I will focus on the quality scores of the raw reads. 
 
+![raw mean quality scores](images/raw-fastqc_per_base_sequence_quality_plot.png)
+***Mean Phred score at each base in the sequence.*** 
+
+**These quality scores look good! Phred score>30 is an indicator of good quality!** 
+
+Follows the expected trend of a slight decrease in quality at the end of the read. There is a slight dip at the beginning of some of the reads - not sure why? Overall though, this is good quality data.
+
+![raw per sequence quality scores](images/raw-fastqc_per_sequence_quality_scores_plot.png)
+***Count of Sequences across quality scores.*** 
+
+**This plot also indicates good quality with a large peak in the number of sequences with a Phred score around 40 and most above 30!** 
+
+However there is still a tail of sequences with lower scores that can be trimmed.
+_______________
+**There are lots of other visualizations in the multiQC report that have informative data, but for now, I will move on to trimming our raw reads.**
+___________
+
+### 3. Trimming raw reads with [`fastp`](https://github.com/OpenGene/fastp)
+
+`fastp` flags:
+
+`-i` = input file, forward
+
+`-I` = input file, reverse
+
+`-o` = output file, forward
+
+`-O` = output file, reverse
+
+`-f` 
+
+
+In my `Working-CASE_RNA` directory, I used `fastp` with the following code. 
+```
+mkdir trimmed  #directory for trimmed read files
+```
+
+This takes roughly ~2-25 mins per sample. I ran this for each set of paired end reads. I know there is a more elegant way to loop through these though. 
+```
+fastp -i CA_J06.F.fq.gz -I CA_J06.R.fq.gz -o trimmed/CA_J06.F.trim.fq.gz -O trimmed/CA_J06.R.trim.fq.gz  -f 5 -F 5 -q 15 -u 50 -j trimmed/CA_J06.json -h trimmed/CA_J06.html
+```
+
+Check how many files are in the trimmed directory. It should be 56 files total (1 F, 1 R, 1 .html, 1 .json *for each sample*). There are 14 samples.
+```
+cd trimmed
+ls | wc -l  #check total number of files (56)
+ls *.json | wc -l   #output: 14
+ls *.html | wc -l   #output: 14
+ls *.R.trim.fq.gz | wc -l  #output: 14
+ls *.F.trim.fq.gz | wc -l  #output: 14
+```
+Sweet! Now all of the reads have been trimmed with `fastp`. We'll check out the quality scores of the trimmed sequences in the next step. 
+
+### 4. Trimmed read quality check
+
+
+
+
+# Notes to self
+Next steps: 
+* fill in the flag meaning for fastp
+* run QC on trimmed reads
+* mapping and aligning 
