@@ -218,12 +218,26 @@ ls *.F.trim.fq.gz | wc -l  #output: 14
 Sweet! Now all of the reads have been trimmed with `fastp`. We'll check out the quality scores of the trimmed sequences in the next step. 
 
 ### 4. Trimmed read quality check
+Running QC like I did for the raw reads. Directing fastqc files and reports to a `fastqc-trimmed` directory. 
+
+```
+mkdir fastqc-trimmed
+fastqc ../trimmed/*fq.gz   #started at 10:30am
 
 
+mv *fastqc.* fastqc-trimmed/
+cd fastq-trimmed/
+ls  #the *fastqc* files should all be in the fastqc-trimmed directory now
+multiqc .
+```
+
+#### Checking out the trimmed reads
+Looking at some plots from the MultiQC report we just generated.
 
 
 # Notes to self
-Next steps: 
-* fill in the flag meaning for fastp
-* run QC on trimmed reads
+Next steps:
+* QC on trimmed reads - done 5/10/22
 * mapping and aligning 
+* fill in the flag meaning for fastp
+* add TOC
