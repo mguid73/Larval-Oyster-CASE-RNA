@@ -2,7 +2,7 @@
 
 **Author: Megan Guidry**
 
-Original analysis and markdown authored by [Maggie Schedl](https://github.com/meschedl). Maggie's analysis workflow is annotated in the `CASE-RNA-Analysis.md` file also in this directory. 
+Original analysis and markdown authored by [Maggie Schedl](https://github.com/meschedl). Maggie's analysis workflow is annotated in the `CASE-RNA-Analysis.md` file also in [this directory](https://github.com/mguid73/Larval-Oyster-CASE-RNA). 
 
 **This document utilizes the analyses that Maggie compiled in her workflow but with an _improved reference genome_ for the eastern oyster.**
 
@@ -45,6 +45,7 @@ Steps:
 2. 
 3. 
 4. 
+5. 
 
 
 ### Set up
@@ -222,17 +223,30 @@ Running QC like I did for the raw reads. Directing fastqc files and reports to a
 
 ```
 mkdir fastqc-trimmed
-fastqc ../trimmed/*fq.gz   #started at 10:30am
-
-
-mv *fastqc.* fastqc-trimmed/
-cd fastq-trimmed/
+fastqc /trimmed/*fq.gz   #took 2.5-3hrs
+cd trimmed
+mv *fastqc.* ../fastqc-trimmed/
+cd ../fastqc-trimmed/
 ls  #the *fastqc* files should all be in the fastqc-trimmed directory now
 multiqc .
 ```
 
 #### Checking out the trimmed reads
 Looking at some plots from the MultiQC report we just generated.
+
+Again there is a lot to look at in these reports but here I've just included a few sequence quality plots. 
+
+![trimmed mean quality scores](images/trimmed-fastqc_per_base_sequence_quality_plot-2.png)
+***Trimmed data. Mean Phred score at each base in the sequence.*** 
+
+
+![trimmed per sequence quality scores](images/trimmed-fastqc_per_sequence_quality_scores_plot.png)
+***Trimmed data. Count of Sequences across quality scores.*** 
+
+These plots look a little more smoothed out than the pre-QC data!
+Next I moved on to mapping those new, trimmed fasta files to the Eastern Oyster Genome.
+
+### 5. Alignment to the *Crassostrea virginica* genome
 
 
 # Notes to self
