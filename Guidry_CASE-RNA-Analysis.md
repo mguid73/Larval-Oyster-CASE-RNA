@@ -4,11 +4,11 @@
 
 Original analysis and markdown authored by [Maggie Schedl](https://github.com/meschedl). Maggie's analysis workflow is annotated in the `CASE-RNA-Analysis.md` file also in [this directory](https://github.com/mguid73/Larval-Oyster-CASE-RNA). 
 
-**This document utilizes the analyses that Maggie compiled in her workflow but with an _improved reference genome_ for the eastern oyster.**
+**This document is an adapation of Maggie's analyses and markdown notes but with an _improved reference genome_ for the eastern oyster.**
 
-This markdown references Erin Robert's [RNASeq pipeline](https://github.com/erinroberts/apoptosis_data_pipeline/blob/master/Streamlined%20Pipeline%20Tutorial/Apoptosis_Pipeline_Tutorial_with_Reduced_Dataset.md) or Kevin Wong's [project](https://github.com/jpuritz/BIO_594_2018/blob/master/FinalAssignment/KevinWong_FinalAssignment/P.dam_DE_Analysis.md) in [J. Puritz's](https://github.com/jpuritz) Bio594 2018.  If other resources were used they should be linked in this markdown. If anything is not linked properly, not-sourced, or looks missing please contact at meschedl@uri.edu or mguidry@uri.edu.
+This markdown references Erin Robert's [RNASeq pipeline](https://github.com/erinroberts/apoptosis_data_pipeline/blob/master/Streamlined%20Pipeline%20Tutorial/Apoptosis_Pipeline_Tutorial_with_Reduced_Dataset.md) or Kevin Wong's [project](https://github.com/jpuritz/BIO_594_2018/blob/master/FinalAssignment/KevinWong_FinalAssignment/P.dam_DE_Analysis.md) in [J. Puritz's](https://github.com/jpuritz) Bio594 2018.  If other resources were used they should be linked in this markdown. If anything is not linked properly, not-sourced, or looks missing please contact at mguidry@uri.edu.
 
-_All analysis was done on our lab shared server, KITT, made by [J. Puritz](https://github.com/jpuritz)_  
+All analysis was done on our lab shared server, KITT, made by [J. Puritz](https://github.com/jpuritz) in /home/mguidry/Working_CASE_RNA 
 
 Programs Installed/Needed for this Project:  
 - HISAT2 
@@ -16,8 +16,6 @@ Programs Installed/Needed for this Project:
 - gffcompare 
 - fastp, fastQC, multiqc
 - samtools
-
-conda create -n CASE-RNA hisat2 stringtie gffcompare fastp fastQC multiqc samtools
 
 File Naming and Information:
 
@@ -30,7 +28,8 @@ location of reference genome on KITT: `/RAID_STORAGE2/Shared_Data/Oyster_Genome/
 
 -------
 
-## Create conda environment & install packages
+## Before you begin...
+Create conda environment & install packages
 ```
 conda create -n CASE-RNA hisat2 stringtie gffcompare fastp fastQC multiqc samtools
 conda activate CASE-RNA
@@ -41,17 +40,17 @@ conda activate CASE-RNA
 ## Quality Control and Read Trimming
 Steps:
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Set up and first look
+2. Raw read QC
+3. Trimming with fastp
+4. Trimmed read QC
+5. Aligning
 
 
-### Set up
+## 1. Set up
 Reads were already de-multiplexed and assigned to each individual sample by [J. Puritz](https://github.com/jpuritz), and linked to a directory called CASE_RNA.
 
- I made a "working" directory to work in, and then linked in the files to that directory.
+ I made a "working" directory and linked in the files to that directory.
 ```
 mkdir Working-CASE-RNA
 cd Working-CASE-RNA
@@ -64,10 +63,12 @@ CA_J06.F.fq.gz  CA_J08.F.fq.gz  CA_J11.F.fq.gz  CA_J18.F.fq.gz  CASE_J03.F.fq.gz
 CA_J06.R.fq.gz  CA_J08.R.fq.gz  CA_J11.R.fq.gz  CA_J18.R.fq.gz  CASE_J03.R.fq.gz  CASE_J09.R.fq.gz  CASE_J12.R.fq.gz  CASE_J13.R.fq.gz  CON_J02.R.fq.gz  CON_J05.R.fq.gz  CON_J10.R.fq.gz  SE_J01.R.fq.gz  SE_J04.R.fq.gz  SE_J07.R.fq.gz 
 ```
 
-### 1. Check out read counts
-The first thing I did was look at the read counts for each file. I used a code from [this website](http://www.sixthresearcher.com/list-of-helpful-linux-commands-to-process-fastq-files-from-ngs-experiments/) and made it into a for-loop that went through all the files. 
+### Check out read counts
+**Purpose:** We want to get an idea of the read counts across our sample files.
 
-It outputs the filename and the number of reads in that file.
+Look at the read counts for each file using a code from [this website](http://www.sixthresearcher.com/list-of-helpful-linux-commands-to-process-fastq-files-from-ngs-experiments/) made into a for-loop that went through all the files. It outputs the filename and the number of reads in that file.
+
+
 
 ```
 for fq in *.fq.gz
@@ -139,8 +140,10 @@ SE_J07.R.fq.gz
 30894132
 ```
 
-### 2. Raw read quality check
-Next, I looked at the quality of the reads in each `.fq.gz` file using [MultiQC](https://multiqc.info/) & [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). I'll go back and run the same on the trimmed data in the next couple of steps too. But first, we want to get an idea of what the data look like first.
+## 2. Raw read quality check
+**Purpose:** Establish a baseline of what the read quality looks like to help determine trimming parameters in the next step. 
+
+Checked out the quality of the reads in each `.fq.gz` file using [MultiQC](https://multiqc.info/) & [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). We'll go back and run the same on the trimmed data in the next couple of steps too. But first, we want to get an idea of what the data look like before trimming.
 
 ```
 mkdir fastqc-raw
@@ -162,7 +165,7 @@ scp -P zzzz mguidry@KITT.uri.edu:/home/mguidry/Working-CASE-RNA/fastqc-raw/multi
 ______________________
 Once you have `multiqc_report.html` locally, simply run `open multiqc_report.html` in terminal from the directory that the file is in. This will open the report in your browser and from there you can poke around on it looking through the different module reports.
 
-#### Digging into the raw reads
+### Digging into the raw reads
 Here, I will focus on the quality scores of the raw reads. 
 
 ![raw mean quality scores](images/raw-fastqc_per_base_sequence_quality_plot.png)
@@ -182,7 +185,8 @@ _______________
 **There are lots of other visualizations in the multiQC report that have informative data, but for now, I will move on to trimming our raw reads.**
 ___________
 
-### 3. Trimming raw reads with [`fastp`](https://github.com/OpenGene/fastp)
+## 3. Trimming raw reads with [`fastp`](https://github.com/OpenGene/fastp)
+**Purpose:** Cleaning up the raw reads to improve quality of sequences used in future analyses. 
 
 `fastp` flags:
 
@@ -194,7 +198,11 @@ ___________
 
 `-O` = output file, reverse
 
-`-f` 
+`-f` or `-t` = front or tail trimming setting, forward
+
+`-F` or `-T` = front or tail trimming setting, reverse (if not specified, reverse settings will be default set to whatever the forward parameters are)
+
+`-u` = how many percent of bases are allowed to be unqualified (integer value 0-100); default is 40%
 
 
 In my `Working-CASE_RNA` directory, I used `fastp` with the following code. 
@@ -218,7 +226,9 @@ ls *.F.trim.fq.gz | wc -l  #output: 14
 ```
 Sweet! Now all of the reads have been trimmed with `fastp`. We'll check out the quality scores of the trimmed sequences in the next step. 
 
-### 4. Trimmed read quality check
+## 4. Trimmed read quality check
+**Purpose:** Ensure that the trimming did what we wanted it to do (i.e. cleaned up lower quality tails). 
+
 Running QC like I did for the raw reads. Directing fastqc files and reports to a `fastqc-trimmed` directory. 
 
 ```
@@ -231,13 +241,13 @@ ls  #the *fastqc* files should all be in the fastqc-trimmed directory now
 multiqc .
 ```
 
-#### Checking out the trimmed reads
+### Checking out the trimmed reads
 Looking at some plots from the MultiQC report we just generated.
 
 Again there is a lot to look at in these reports but here I've just included a few sequence quality plots. 
 
 ![trimmed mean quality scores](images/trimmed-fastqc_per_base_sequence_quality_plot-2.png)
-***Trimmed data. Mean Phred score at each base in the sequence.*** 
+***Trimmed data. Mean Phred score at each base in the sequence.*** No more dip in quality around bp 135.
 
 
 ![trimmed per sequence quality scores](images/trimmed-fastqc_per_sequence_quality_scores_plot.png)
@@ -246,12 +256,65 @@ Again there is a lot to look at in these reports but here I've just included a f
 These plots look a little more smoothed out than the pre-QC data!
 Next I moved on to mapping those new, trimmed fasta files to the Eastern Oyster Genome.
 
-### 5. Alignment to the *Crassostrea virginica* genome
+## 5. Alignment to the *Crassostrea virginica* genome with [HISAT2](http://daehwankimlab.github.io/hisat2/manual/)
+In May 2022, I used an updated version of the *C. virginica* genome available at /RAID_STORAGE2/Shared_Data/Oyster_Genome/masked/masked.cvir.genome.fasta on KITT. 
+
+**November 2022**, I am using the *C. virginica* reference genome available on KITT at `/home/Genomic_Resources/C_virginica/reference.fasta`
+
+
+To align the trimmed reads to the genome, I used [HISAT2](http://daehwankimlab.github.io/hisat2/manual/). I chose this aligner based on recommendations made by [Bahrami 2020](https://www.clinmedjournals.org/articles/jggr/journal-of-genetics-and-genome-research-jggr-7-048.pdf):
+
+>HISAT2 resulted in the highest percentage of correctly mapped reads when compared to TopHat2, STAR, and Bowtie2 (other alignment softwares).
+
+
+**Set up.** For ease of naviagation, I created a new directory for aligning reads called `alignment2ref`. In this directory, I linked to the trimmed `fq.gz` reads and linked to the genome.
+```
+cd /home/mguidry/Working-CASE-RNA/
+mkdir alignment2ref
+cd alignment2ref
+
+ln -s /home/mguidry/Working-CASE-RNA/trimmed/*.trim.fq.gz .
+ln -s /home/Genomic_Resources/C_virginica/reference.fasta 
+```
+
+**Running HISAT2.** I ran the following script, called `CASE-HISAT2.sh` (originally authored by Maggie Schedl, updated version 7/2020 to account for strandedness). At this point, I double-checked that I was in the conda environment `CASE-RNA` I had made earlier because this is where I have HISAT2 installed.
+
+This script first makes an index using the reference genome then it aligns each trimmed `fq.gz` file to the genome using that index.
+
+
+```
+nano /home/mguidry/Working-CASE-RNA/alignment2ref/CASE-HISAT2.sh
+```
+
+Run time ~6+ hrs
+
+```
+##!/bin/bash
+
+#Specify working directory
+F=/home/mguidry/Working-CASE-RNA/alignment2ref
+
+#Indexing a reference genome and no annotation file (allowing for novel transcript discovery)
+#Build HISAT index with Cvirginica genome file
+
+hisat2-build -f $F/reference.fasta $F/cvirginica_hisat
+#-f indicates that the reference input files are FASTA files
+
+#Aligning paired end reads
+#Has the F in here because the sed in the for loop changes it to a R. SAM files are of both forward and reverse reads
+array1=($(ls $F/*F.trim.fq.gz))
+
+# This then makes it into a bam file
+# And then also sorts the bam file because Stringtie takes a sorted file for input
+# And then removes the sam file because I don't need it anymore
+
+for i in ${array1[@]}; do
+        hisat2 --dta -x $F/cvirginica_hisat -1 ${i} -2 $(echo ${i}|sed s/F.trim/R.trim/) --rna-strandness FR -S ${i}.sam
+        samtools sort ${i}.sam > ${i}.s.bam
+                echo "${i}_bam"
+        rm ${i}.sam
+        echo "HISAT2 PE ${i}" $(date)
+```
 
 
 # Notes to self
-Next steps:
-* QC on trimmed reads - done 5/10/22
-* mapping and aligning 
-* fill in the flag meaning for fastp
-* add TOC
