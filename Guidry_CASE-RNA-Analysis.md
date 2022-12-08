@@ -279,15 +279,13 @@ ln -s /home/Genomic_Resources/C_virginica/reference.fasta
 
 **Running HISAT2.** I ran the following script, called `CASE-HISAT2.sh` (originally authored by Maggie Schedl, updated version 7/2020 to account for strandedness). At this point, I double-checked that I was in the conda environment `CASE-RNA` I had made earlier because this is where I have HISAT2 installed.
 
-This script first makes an index using the reference genome then it aligns each trimmed `fq.gz` file to the genome using that index.
+This script first makes an index using the reference genome then it aligns each trimmed `fq.gz` file to the genome using that index. You only need to make the index once. Next, hisat2 takes in the paired sequences and aligns them to the index and produces 1 SAM file. Next steps convert SAM to BAM then sort BAM. Finally the SAM file is deleted and the alignment info is stored in a folder called 'summaries'.
 
+Running each sample pair (fwd/rev) took about 25mins. (Began running ~11:50am 12/6/22 and finished ~2:50am 12/7/22)
 
 ```
 nano /home/mguidry/Working-CASE-RNA/alignment2ref/CASE-HISAT2.sh
 ```
-
-Run time ~6+ hrs
-
 ```
 ##!/bin/bash
 
@@ -295,26 +293,49 @@ Run time ~6+ hrs
 F=/home/mguidry/Working-CASE-RNA/alignment2ref
 
 #Indexing a reference genome and no annotation file (allowing for novel transcript discovery)
-#Build HISAT index with Cvirginica genome file
-
+#Build HISAT index with Cvirginica genome file - once the index is built, you don't have to re-run this
 hisat2-build -f $F/reference.fasta $F/cvirginica_hisat
 #-f indicates that the reference input files are FASTA files
 
 #Aligning paired end reads
-#Has the F in here because the sed in the for loop changes it to a R. SAM files are of both forward and reverse reads
+#Has the F in here because the sed in the for loop changes it to a R. 
+#SAM files are of both forward and reverse reads (one SAM file for each pair of Fwd and Rev)
 array1=($(ls $F/*F.trim.fq.gz))
 
-# This then makes it into a bam file
-# And then also sorts the bam file because Stringtie takes a sorted file for input
-# And then removes the sam file because I don't need it anymore
 
-for i in ${array1[@]}; do
-        hisat2 --dta -x $F/cvirginica_hisat -1 ${i} -2 $(echo ${i}|sed s/F.trim/R.trim/) --rna-strandness FR -S ${i}.sam
-        samtools sort ${i}.sam > ${i}.s.bam
-                echo "${i}_bam"
+#for each file in the array...
+#aligns the given files (Fwd & Rev) to the index (previously generated) with the --dta flag indicating to report the alignments tailored for transcript assemblers 
+#then outputs the alignment summary to a sample specific summary file
+#next samtools view converts the sam to bam and samtools sort converts the bam to a sorted (smaller) bam file that stringtie will like
+#finally we remove the sam file because it's really big and we dont need it anymore
+for i in ${array1[@]}; do 
+        hisat2 --dta -x $F/cvirginica_hisat -1 ${i} -2 $(echo ${i}|sed s/F.trim/R.trim/) --rna-strandness FR -S ${i}.sam 2>${i}.alignsummary.txt
+        samtools view -bS ${i}.sam > ${i}.bam
+        samtools sort ${i}.bam -o ${i}.s.bam
+    		echo "${i}_bam"
         rm ${i}.sam
         echo "HISAT2 PE ${i}" $(date)
+done
+
+#move all of the summary files to their own directory
+mv *.alignsummary.txt ./summaries
 ```
+Sorted BAM files are then used with StringTie to generate annotation files with transcript abundances.  
+**Range of ~79-84% alignment rate across samples.** Alignment summaries stored in /alignment2ref/summaries.
+
+## 6. Transcript Assembly with [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
+
+Created a new directory for running the transcript assembly called 'stringtie'. In that directory, I've linked in the annotation file (that lives in storage) and the sorted BAM files we made in the step above.
+
+```
+mkdir stringtie
+cd stringtie
+ln -s /RAID_STORAGE2/mschedl/RNA-CASE/ref_C_virginica-3.0_top_level.gff3 .
+ln -s /home/mschedl/Working-CASE-RNA/histat/*.s.bam .
+```
+
+>Note from Maggie's workflow: 
+"Originally, I had tried to run StringTie with the annotation file downloaded from [NCBI](https://www.ncbi.nlm.nih.gov/genome/?term=Crassostrea%20virginica), which did not work, but that may have been for a variety of reasons at the time."
 
 
 # Notes to self
