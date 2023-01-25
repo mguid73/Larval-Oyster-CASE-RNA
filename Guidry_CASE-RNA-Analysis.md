@@ -506,3 +506,5 @@ In excel I made a .csv file with the metadata/treatment information for each sam
 Then I uploaded it to KITT (via github) so I could use it in the same directory as the count matrixes.
 
 Just the gene_count_matrix.csv and the treatment_data.csv are needed for DESeq2. See the Rmarkdown file that is set for GitHub view for all Differential Expression analysis!
+
+Switch on over to R studio (on kitt server) and follow `Larval-Oyster-CASE-RNA/MG-DESeq2/DESeq2.Rmd`
