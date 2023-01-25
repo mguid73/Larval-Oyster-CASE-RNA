@@ -31,8 +31,8 @@ getwd()
 
 ```{r}
 
-#DIFFERENT SAMPLE INFO
-Sample_info <- read.csv("sample_info.csv", header=TRUE, sep=",")
+#Get sample/treatment data
+Sample_info <- read.csv("treatment_data.csv", header=TRUE, sep=",")
 print(Sample_info)
 
 #load in the transcript counts file, and set the row names as the transcript ID
@@ -40,7 +40,8 @@ CASE_GeneCountData <- as.data.frame(read.csv("gene_count_matrix.csv", row.names=
 head(CASE_GeneCountData,10)
 
 ###filtering values for PoverA
-#set filter values for PoverA, P percent of the samples have counts over A
+#set filter values for PoverA (P percent of the samples have counts over A)
+# here P = 0.214 and A = 5
 filt <- filterfun(pOverA(0.214,5))
 
 #create filter for the counts data
@@ -49,13 +50,15 @@ tfil <- genefilter(CASE_GeneCountData, filt)
 #identify transcripts to keep by count filter
 keep <- CASE_GeneCountData[tfil,]
 
-#identify transcript list
+#identify gene names in transcript list to keep
 gn.keep <- rownames(keep)
 
 #data filtered in PoverA, P percent of the samples have counts over A
 CASE_GeneCountData_Filt <- as.data.frame(CASE_GeneCountData[which(rownames(CASE_GeneCountData) %in% gn.keep),])
-#write.csv(counts.5x, file="filtered_counts.csv")
+#write.csv(CASE_GeneCountData_Filt, file="filtered_counts.csv")
 head(CASE_GeneCountData_Filt,10)
+CASE_GeneCountData_Filt #29,338 transcripts
+CASE_GeneCountData #62,745 transcripts
 
 ```
 
@@ -76,9 +79,9 @@ all(rownames(Sample_info) == colnames(CASE_GeneCountData_Filt))    # should retu
 ```
 
 ```{r}
+# Here I need to have a Sample_info file with columns for effluent and pCO2 (with "ambient" and "high" levels for both)
 
-
-# Sample_info$group <- factor(paste0(Sample_info$effluent, Sample_info$pCO2)) #merge condition and time into group
+Sample_info$group <- factor(paste0(Sample_info$effluent,"_",Sample_info$pCO2)) #merge condition and time into group
 
 Sample_info$effluent = factor(x = Sample_info$effluent,levels = c('ambient','high'))
 Sample_info$pCO2 = factor(x = Sample_info$pCO2,levels = c('ambient','high'))
@@ -86,20 +89,21 @@ Sample_info$pCO2 = factor(x = Sample_info$pCO2,levels = c('ambient','high'))
 #Make matrix, there are multiple ways to make the matrix, but because I already start from a matrix I used DESeqDataSetFromMatrix
 CASE_deseq_Matrix <- DESeqDataSetFromMatrix(countData = CASE_GeneCountData_Filt,
                               colData = Sample_info,
-                              design = ~ effluent + pCO2 + effluent:pCO2 ) # column name of the treatment information as teh design 
+                              design = ~ effluent + pCO2 + effluent:pCO2 ) # column name of the treatment information as the design 
 CASE_deseq_Matrix
 
 #extra filtering of low counts?
 keep <- rowSums(counts(CASE_deseq_Matrix)) >= 10
 CASE_deseq_Matrix <- CASE_deseq_Matrix[keep,]
 
-CASE_deseq_Matrix # not any different
+CASE_deseq_Matrix # not any different than before filtering
 ```
 
 ```{r}
 
 CASE_dds_2 <- DESeq(CASE_deseq_Matrix)
-resultsNames(CASE_dds_2)
+resultsNames(CASE_dds_2) #resultsNames returns the names of the estimated effects (coefficents) of the model
+# [1] "Intercept"                "effluent_high_vs_ambient" "pCO2_high_vs_ambient"     "effluenthigh.pCO2high"
 ```
 
 
@@ -112,36 +116,39 @@ effluent_pCO2_interact <- results(CASE_dds_2, alpha=0.1, name = "effluenthigh.pC
 ```
 
 
+In the results printed below, LFC is a count ratio to estimate the logFoldChange. 
 ```{r}
-summary(full_results)
 
+print("full results")
+summary(full_results)
+print("effluent_ambient results")
 summary(effluent_ambient)
+print("pCO2_ambient results")
 summary(pCO2_ambient)
+print("effluent_pCO2_interact results")
 summary(effluent_pCO2_interact)
 ```
+?results to see default settings for results() function
 what do those low counts mean? 
-
 what if independent filtering is off?
 
 ```{r}
+
 full_results <- results(CASE_dds_2, alpha=0.1)
 effluent_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluent_high_vs_ambient")
 pCO2_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "pCO2_high_vs_ambient")
 effluent_pCO2_interact2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluenthigh.pCO2high")
 
+print("effluent_ambient")
 summary(effluent_ambient2)
+print("pCO2_ambient")
 summary(pCO2_ambient2)
+print("effluent_pCO2_interact")
 summary(effluent_pCO2_interact2)
-
-
 ```
 
 
-
-
-
-
-
+Using the original results outputs, because there isn't a difference in reported values between those generated with the defaults for results() and turning off independentFiltering
 ```{r}
 sig_effluent <- subset(effluent_ambient, padj<0.1) #identify signficant pvalues 
 sig_pCO2 <- subset(pCO2_ambient, padj<0.1)
