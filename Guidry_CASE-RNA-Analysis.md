@@ -44,7 +44,9 @@ Steps:
 2. Raw read QC
 3. Trimming with fastp
 4. Trimmed read QC
-5. Aligning
+5. Alignment (HISAT2)
+6. Assembly (StringTie)
+7. Prep files for differential expression analysis
 
 
 ## 1. Set up
@@ -435,7 +437,8 @@ gffcompare -r $F/ref_C_virginica-3.0_top_level.gff3 -G -o c_vir_merged_compare C
 echo "DONE" $(date)
 ```
 
-For the next and final steps, I'll be working in a new directory called 'DEprep'
+## 7. Prep files for DE analysis
+For the next and final steps, I'll be working in a new directory called 'DEprep' to get .csv files to use in the differential expression analysis.
 
 ```
 cd ..
@@ -479,7 +482,7 @@ The sample_list.txt now has all the names and file paths. Then I ran the prepDE 
 python prepDE.py -i sample_list.txt
 ```
 
-This outputs a 'transcript_count_matrix.csv' and a 'gene_count_matrix.csv'
+**This outputs a 'transcript_count_matrix.csv' and a 'gene_count_matrix.csv'**
 
 In excel I made a .csv file with the metadata/treatment information for each sample. It looks like this:
 
