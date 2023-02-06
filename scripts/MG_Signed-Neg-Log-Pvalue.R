@@ -1,6 +1,6 @@
 #Preparing log pvalue with downregulated negative fo GO_MWU
 #Maggie Schedl -2019
-# updated by Megan Guidry - Jan 2023
+# updated by Megan Guidry - Feb 2023
 
 #For preparing results from DESeq2 for use with GO_MWU https://github.com/z0on/GO_MWU
 #The analysis requires a text file with one column of gene names and one column of "raw" p-values. 
