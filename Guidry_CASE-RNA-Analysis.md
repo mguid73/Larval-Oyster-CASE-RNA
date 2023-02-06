@@ -486,22 +486,22 @@ python prepDE.py -i sample_list.txt
 
 In excel I made a .csv file with the metadata/treatment information for each sample. It looks like this:
 
-| sample   | treatment | library | extraction |
-|----------|-----------|---------|------------|
-| CASE_J03 | CASE      | three   | two        |
-| CASE_J09 | CASE      | four    | two        |
-| CASE_J12 | CASE      | two     | three      |
-| CASE_J13 | CASE      | two     | three      |
-| CA_J06   | CA        | three   | two        |
-| CA_J08   | CA        | one     | two        |
-| CA_J11   | CA        | four    | three      |
-| CA_J18   | CA        | two     | three      |
-| CON_J02  | CON       | three   | one        |
-| CON_J05  | CON       | one     | two        |
-| CON_J10  | CON       | four    | two        |
-| SE_J01   | SE        | one     | one        |
-| SE_J04   | SE        | four    | three      |
-| SE_J07   | SE        | three   | two        |
+| sample   | treatment | effluent | pCO2  | library | extraction |
+|----------|-----------|----------|-------|---------|------------|
+| CASE_J03 | CASE      |SE        |CA     | three   | two        |
+| CASE_J09 | CASE      |SE        |CA     | four    | two        |
+| CASE_J12 | CASE      |SE        |CA     | two     | three      |
+| CASE_J13 | CASE      |SE        |CA     | two     | three      |
+| CA_J06   | CA        |ambient   |CA     | three   | two        |
+| CA_J08   | CA        |ambient   |CA     | one     | two        |
+| CA_J11   | CA        |ambient   |CA     | four    | three      |
+| CA_J18   | CA        |ambient   |CA     | two     | three      |
+| CON_J02  | CON       |ambient   |ambient| three   | one        |
+| CON_J05  | CON       |ambient   |ambient| one     | two        |
+| CON_J10  | CON       |ambient   |ambient| four    | two        |
+| SE_J01   | SE        |SE        |ambient| one     | one        |
+| SE_J04   | SE        |SE        |ambient| four    | three      |
+| SE_J07   | SE        |SE        |ambient| three   | two        |
 
 Then I uploaded it to KITT (via github) so I could use it in the same directory as the count matrixes.
 

@@ -6,6 +6,8 @@ output: github_document
 ---
 
 Following Maggie's original script from April 2020 with some updates where noted.
+Paper on differential expression analysis tools and # of replicates: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4878611/
+Take home quote: "If fewer than 12 replicates are used, a superior combination of true positive and false positive performances makes edgeR and DESeq2 the leading tools."
 
 ```{r, results="hide"}
 library(DESeq2)
@@ -79,14 +81,13 @@ all(rownames(Sample_info) == colnames(CASE_GeneCountData_Filt))    # should retu
 ```
 
 ```{r}
-# Here I need to have a Sample_info file with columns for effluent and pCO2 (with "ambient" and "high" levels for both)
-
 Sample_info$group <- factor(paste0(Sample_info$effluent,"_",Sample_info$pCO2)) #merge condition and time into group
 
-Sample_info$effluent = factor(x = Sample_info$effluent,levels = c('ambient','high'))
-Sample_info$pCO2 = factor(x = Sample_info$pCO2,levels = c('ambient','high'))
+Sample_info$effluent = factor(x = Sample_info$effluent,levels = c('ambient','SE'))
+Sample_info$pCO2 = factor(x = Sample_info$pCO2,levels = c('ambient','CA'))
 
 #Make matrix, there are multiple ways to make the matrix, but because I already start from a matrix I used DESeqDataSetFromMatrix
+# design is a 'formula' which expresses how the counts for each gene depend on the variables in 'colData' (the metadata)
 CASE_deseq_Matrix <- DESeqDataSetFromMatrix(countData = CASE_GeneCountData_Filt,
                               colData = Sample_info,
                               design = ~ effluent + pCO2 + effluent:pCO2 ) # column name of the treatment information as the design 
@@ -99,24 +100,28 @@ CASE_deseq_Matrix <- CASE_deseq_Matrix[keep,]
 CASE_deseq_Matrix # not any different than before filtering
 ```
 
+
 ```{r}
 
 CASE_dds_2 <- DESeq(CASE_deseq_Matrix)
 resultsNames(CASE_dds_2) #resultsNames returns the names of the estimated effects (coefficents) of the model
+# those "estimated effects" listed are those effects that DESeq identified as having the most differentially expressed genes in the design fed into the model
 # [1] "Intercept"                "effluent_high_vs_ambient" "pCO2_high_vs_ambient"     "effluenthigh.pCO2high"
+### "Intercept"           "effluent_SE_vs_noSE" "pCO2_CA_vs_ambient"  "effluentSE.pCO2CA"
 ```
 
 
 ```{r}
-
+#filtering based on alpha = 0.1 (which is the cutoff value for the adjusted p-value I believe) where to be included the DEG's have to have an adj. p-value less than alpha
+## seems like alpha = 0.01 is the default value
 full_results <- results(CASE_dds_2, alpha=0.1)
-effluent_ambient <- results(CASE_dds_2, alpha=0.1, name = "effluent_high_vs_ambient")
-pCO2_ambient <- results(CASE_dds_2, alpha=0.1, name = "pCO2_high_vs_ambient")
-effluent_pCO2_interact <- results(CASE_dds_2, alpha=0.1, name = "effluenthigh.pCO2high")
+effluent_ambient <- results(CASE_dds_2, alpha=0.1, name = "effluent_SE_vs_ambient")
+pCO2_ambient <- results(CASE_dds_2, alpha=0.1, name = "pCO2_CA_vs_ambient")
+effluent_pCO2_interact <- results(CASE_dds_2, alpha=0.1, name = "effluentSE.pCO2CA")
 ```
 
 
-In the results printed below, LFC is a count ratio to estimate the logFoldChange. 
+In the results printed below, LFC is a count ratio to estimate the logFoldChange. And do "up" and "down" refer to up and down regulation of genes?
 ```{r}
 
 print("full results")
@@ -135,9 +140,9 @@ what if independent filtering is off?
 ```{r}
 
 full_results <- results(CASE_dds_2, alpha=0.1)
-effluent_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluent_high_vs_ambient")
-pCO2_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "pCO2_high_vs_ambient")
-effluent_pCO2_interact2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluenthigh.pCO2high")
+effluent_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluent_SE_vs_ambient")
+pCO2_ambient2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "pCO2_CA_vs_ambient")
+effluent_pCO2_interact2 <- results(CASE_dds_2, alpha=0.1, independentFiltering = FALSE, name = "effluentSE.pCO2CA")
 
 print("effluent_ambient")
 summary(effluent_ambient2)
@@ -150,6 +155,7 @@ summary(effluent_pCO2_interact2)
 
 Using the original results outputs, because there isn't a difference in reported values between those generated with the defaults for results() and turning off independentFiltering
 ```{r}
+#assign significant DEGs to variables based on treatment
 sig_effluent <- subset(effluent_ambient, padj<0.1) #identify signficant pvalues 
 sig_pCO2 <- subset(pCO2_ambient, padj<0.1)
 sig_interact <- subset(effluent_pCO2_interact, padj<0.1)
@@ -159,24 +165,28 @@ combine <- rbind(sig_effluent, sig_pCO2, sig_interact)
 combine_list <- CASE_deseq_Matrix[which(rownames(CASE_deseq_Matrix) %in% rownames(combine)),] #combined list from the original matrix so dupicates are removed 
 combine_rlog <- rlog(combine_list, blind=FALSE)
 
-
-
 ```
 
+
 ```{r}
+# Quick PCA plot to start
 plotPCA(combine_rlog, intgroup=c("effluent", "pCO2")) # same PCA as below but less pretty, use this for knowing the PC loadings for the labels in the below PCA
 
 pcaData <- plotPCA(combine_rlog, intgroup=c("effluent", "pCO2"), returnData=TRUE)
+treatment <- c("CASE","CASE","CASE","CASE","CA","CA","CA","CA","CON","CON","CON","SE","SE","SE")
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 ggplot(pcaData, aes(PC1, PC2, color=effluent:pCO2)) +
+  geom_text(label=treatment, nudge_y=0.5)+
   geom_point(size=3) +
-  coord_fixed() + ylab("PC2: 16% Variance Explained") +
+  coord_fixed() + ylab("PC2: 29% Variance Explained") +
   xlab("PC1: 34% Variance Explained") +
-  theme_linedraw() + scale_color_manual(values = c("ambient:ambient" = "#aa2faa", "ambient:high" = "#2e5aaa", "high:ambient" = "#593959", "high:high" = "#41a08e"))
+  theme_linedraw() + scale_color_manual(values = c("ambient:ambient" = "#aa2faa", "ambient:CA" = "#2e5aaa", "SE:ambient" = "#593959", "SE:CA" = "#41a08e")) 
+  
 ```
 this is really nice clustering 
 
 
+COMBINED DEGs (difference in gene expression compared to average across all samples)
 ```{r}
 sig.num <- sum(combine$padj <0.1, na.rm=T) 
 topVarGenes <- head(order(rowVars(assay(combine_rlog)),decreasing=TRUE),sig.num) #sort by decreasing sig
@@ -188,7 +198,7 @@ df1 <- as.data.frame(colData(combine_rlog)[c("effluent", "pCO2")]) #make datafra
 
 
 colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
-ann_colors <- list(effluent = c(ambient="blue", high="red"), pCO2 = c(ambient= "gray", high= "black"))
+ann_colors <- list(effluent = c(ambient="blue", SE="red"), pCO2 = c(ambient= "gray", CA= "black"))
 breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
 pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, clustering_method = "average", 
          clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=T,
@@ -199,7 +209,7 @@ These actually cluster out by treatment?!?!
 
 
 
-
+ONLY EFFLUENT DEGs (difference in gene expression compared to average but only for effluent DEGs???)
 ```{r}
 sig_effluen_num <- sum(effluent_ambient$padj <0.1, na.rm=T) #I don't know why you need this
 ef_list <- CASE_deseq_Matrix[which(rownames(CASE_deseq_Matrix) %in% rownames(effluent_ambient)),]
@@ -211,7 +221,7 @@ col.order <- c("CASE_J03", "CASE_J09", "CASE_J12", "CASE_J13", "CA_J06",   "CA_J
 mat <- mat[,col.order]
 df <- as.data.frame(colData(r_ef_list)[,c("effluent", "pCO2")]) #make dataframe
 colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
-ann_colors <- list(effluent = c(ambient="blue", high="red"), pCO2 = c(ambient= "gray", high= "black"))
+ann_colors <- list(effluent = c(noSE="blue", SE="red"), pCO2 = c(ambient= "gray", CA= "black"))
 breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
 pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, clustering_method = "average", 
          clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=T,
@@ -221,21 +231,24 @@ pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, clustering_metho
 these don't. why?? 
 
 
-Well, this is still right
+Plot counts of a specific gene across treatments
 ```{r}
 #Shared MSTRG.20077 both very significantly upregulated in CASE and SE, gene21544, translates to steroid 17-alpha-hydroxylase/17,20 lyase-like (LOC111135334)
 
 plotCounts(CASE_dds_2,"MSTRG.20077", intgroup=c("effluent", "pCO2"))
 
+# add in anova?
+
 MSTRG_20077 <- plotCounts(CASE_dds_2,"MSTRG.20077", intgroup=c("effluent", "pCO2"), returnData=TRUE)
 ggplot(MSTRG_20077, aes(x=effluent:pCO2, y=count, color=effluent:pCO2)) + geom_boxplot() +
-  geom_point() + ylab("Normalized Counts") + xlab("Treatment") + ggtitle("steroid 17-alpha-hydroxylase/17,20 lyase-like (LOC111135334)") + scale_color_manual(values = c("ambient:ambient" = "#aa2faa", "ambient:high" = "#2e5aaa", "high:ambient" = "#593959", "high:high" = "#41a08e"))+ theme(legend.position = "none") + theme_minimal()
+  geom_point() + ylab("Normalized Counts") + xlab("Treatment") + ggtitle("steroid 17-alpha-hydroxylase/17,20 lyase-like (LOC111135334)") + scale_color_manual(values = c("ambient:ambient" = "#aa2faa", "ambient:CA" = "#2e5aaa", "SE:ambient" = "#593959", "SE:CA" = "#41a08e"))+ theme(legend.position = "none") + theme_minimal()
 ```
 
 
-
+Let's make a Venn diagram of the genes that overlap across treatments
 ```{r}
-sigpCO2genes <- row.names(sig_pCO2) #just gets the names of the genes, which is all that is needed to compare
+#gets the names of the genes, which is all that is needed to compare
+sigpCO2genes <- row.names(sig_pCO2) 
 siginteract_genes <- row.names(sig_interact)
 sigeff_genes <- row.names(sig_effluent)
 
@@ -257,7 +270,7 @@ ven3 <- vennCounts(counts3)
 vennDiagram(ven3, cex = 1,names = c("pCO2", "effluent", "interaction"), circle.col = c("#2e5eaa", "#593959", "#40a08e"))
 ```
 
-
+WHAT IS THIS DOING? -MG 01/30/23
 ```{r}
 metadata(effluent_pCO2_interact)$alpha
 
@@ -283,7 +296,13 @@ p <- 3
 abline(h=qf(.99, p, m - p))
 ```
 
-
+More PCA fun...
+Comparing rlog() and vst() transformations in below code chunks.
+Details below from the [DESeq2 user manual](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf).
+rlog() applies a 'regularized log' transformation meaning it minimizes differences between samples for rows with small counts (normalizing with respect to library size).
+vst() applies variance stabilizing transformation then transforms the count data (normalized by dividing it by the size factors or normalization factors) and yields a matrix of values which have approx. constant variance along the range of mean values.
+In comparison, rlog is more robust in the case when size factors vary widely because vst applies a more sweeping normalization??
+In all of the PCA analyses above, the rlog() was used
 ```{r}
 rlog <- rlog(CASE_dds_2, blind = FALSE)
 plotPCA(rlog, intgroup=c("effluent", "pCO2"))
