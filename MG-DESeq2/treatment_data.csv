@@ -1,4 +1,4 @@
-sample,treatment_name,effluent,pCO2,library,extraction
+sample,treatment,effluent,pCO2,library,extraction
 CASE_J03,CASE,SE,CA,three,two
 CASE_J09,CASE,SE,CA,four,two
 CASE_J12,CASE,SE,CA,two,three
