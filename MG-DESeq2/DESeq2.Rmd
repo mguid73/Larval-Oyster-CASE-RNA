@@ -1,7 +1,7 @@
 ---
 title: "CASE-DESeq2-2"
 author: "Megan Guidry"
-date: "4/13/2020"
+date: "2/22/2023"
 output: github_document
 ---
 
@@ -60,8 +60,8 @@ gn.keep <- rownames(keep)
 CASE_GeneCountData_Filt <- as.data.frame(CASE_GeneCountData[which(rownames(CASE_GeneCountData) %in% gn.keep),])
 #write.csv(CASE_GeneCountData_Filt, file="filtered_counts.csv")
 head(CASE_GeneCountData_Filt,10)
-CASE_GeneCountData_Filt #29,338 transcripts
-CASE_GeneCountData #62,745 transcripts
+#CASE_GeneCountData_Filt #29,338 transcripts
+#CASE_GeneCountData #62,745 transcripts
 
 ```
 
@@ -338,13 +338,13 @@ vst() applies variance stabilizing transformation then transforms the count data
 In comparison, rlog is more robust in the case when size factors vary widely because vst applies a more sweeping normalization??
 In all of the PCA analyses above, the rlog() was used
 ```{r}
-rlog <- rlog(CASE_dds_2, blind = FALSE)
-plotPCA(rlog, intgroup=c("effluent", "pCO2"))
+#rlog <- rlog(CASE_dds_2, blind = FALSE)
+#plotPCA(rlog, intgroup=c("effluent", "pCO2"))
 ```
 
 ```{r}
-vst <- vst(CASE_dds_2, blind = FALSE)
-plotPCA(vst, intgroup=c("effluent", "pCO2"))
+#vst <- vst(CASE_dds_2, blind = FALSE)
+#plotPCA(vst, intgroup=c("effluent", "pCO2"))
 ```
 
 
