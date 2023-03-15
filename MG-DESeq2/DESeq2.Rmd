@@ -305,6 +305,7 @@ sigSE_genes.2 <- comb3_row %in% sigSE_genes
 counts3 <- cbind(sigCA_genes.2, sigSE_genes.2, sigCASE_genes.2)
 ven3 <- vennCounts(counts3)
 vennDiagram(ven3, cex = 1,names = c("CA", "SE", "CASE"), circle.col = c("#2e5eaa", "#593959", "#40a08e"))
+
 ```
 
 ```{r}
