@@ -485,6 +485,103 @@ print("CASE Module Correlation p-values")
 moduleTraitPvalue_CASE
 ```
 
+```{r}
+row.names(dds4) = dds4$X
+dds4$X = NULL
+dds5 = as.data.frame((dds4))
+dim(dds5) 
+module_grey_genes <- names(dds5)[moduleColors=="grey"]
+
+write.csv(module_grey_genes, "module_grey_genes.csv", quote=F)
+```
+
+Hub genes -- this did not do what I wanted it to...
+```{r}
+# CASE = as.data.frame(Traits.CASE$CASE);
+# names(CASE) = "combinedCASE"
+# modNames = substring(names(MEs), 3)
+# ModuleMembership = as.data.frame(cor(dds4, MEs, use = "p"));
+# MMPvalue = as.data.frame(corPvalueStudent(as.matrix(ModuleMembership), nSamples));
+# names(ModuleMembership) = paste("MM", modNames, sep="");
+# names(MMPvalue) = paste("p.MM", modNames, sep="");
+# TraitSignificance = as.data.frame(cor(dds4, CASE, use = "p"));
+# GSPvalue = as.data.frame(corPvalueStudent(as.matrix(TraitSignificance), nSamples));
+# names(TraitSignificance) = paste("GS.", names(CASE), sep="");
+# names(GSPvalue) = paste("p.GS.", names(CASE), sep="");
+# module = "grey"
+# column = match(module, modNames);
+# moduleTaxa = moduleColors==module;
+# sizeGrWindow(7, 7);
+# par(mfrow = c(1,1));
+# verboseScatterplot(abs(ModuleMembership[moduleTaxa, column]),
+#                    abs(TraitSignificance[moduleTaxa, 1]),
+#                    xlab = paste("Module Membership in", module, "module"),
+#                    ylab = "Significance for CASE",
+#                    main = paste("Module membership vs. significance\n"),
+#                    cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
+# 
+# 
+# 
+# 
+# #ModuleMembership = as.data.frame(cor(dds4, MEs, use = "p"))
+# #TraitSignificance = as.data.frame(cor(dds4, Traits.CASE_asnum, use = "p"))
+# #MMPvalue = as.data.frame(corPvalueStudent(as.matrix(ModuleMembership), nSamples));
+# 
+# hubs    = chooseTopHubInEachModule(dds4, moduleColors)
+# head(MMPvalue) 
+# head(ModuleMembership)
+# hg_df <- cbind(ModuleMembership,MMPvalue,TraitSignificance)
+# dim(hg_df)
+# head(hg_df)
+# 
+# grey_CASE <- hg_df[c(abs(hg_df$MMgrey) >= 0.7 & hg_df$p.MMgrey <= 0.05),c(19)]
+# dim(grey_CASE)
+# View(grey_CASE)
+# 
+# grey_CASE2 <- hg_df[moduleTaxa,c(19)]
+# dim(grey_CASE2)
+# View(grey_CASE2)
+# 
+# 
+# dim(grey_CASE)
+# WGCNA_hub <- as.data.frame(dds4)
+# WGCNA_hub2 <- merge(WGCNA_hub,grey_CASE,by="row.names")
+# head(WGCNA_hub2)
+# 
+# row.names(WGCNA_hub2) <- WGCNA_hub2$Row.names  
+# row.names(WGCNA_hub3) <- WGCNA_hub3$Row.names  
+# WGCNA_hub2$Row.names = NULL
+# WGCNA_hub3$Row.names = NULL
+# dim(WGCNA_hub2)
+# #[1] 123 298
+# dim(WGCNA_hub3)
+# #[1] 16 298
+# 
+# sigtab_black = WGCNA_hub2
+# sigtab_black2 = cbind(as(sigtab_black, "data.frame"), as(tax_table(genusglom)[rownames(sigtab_black), ], "matrix"))
+# head(sigtab_black2)
+# #colnames(sigtab_black2)[2] <- c("log2FoldChange_outplant")
+# #colnames(sigtab_black2)[7] <- c("WGCNA_ModuleMembership")
+# #colnames(sigtab_black2)[8] <- c("WGCNA_ModulePvalue")
+# head(sigtab_black2)
+# write.csv(sigtab_black2,"ModuleBlack_output.csv",quote=T)
+# View(sigtab_black2)
+# 
+# 
+# sigtab_black2
+# head(Metadata)
+# Metadata2 <- Metadata
+# row.names(Metadata2) <- Metadata2$Sample_ID
+# sigtab_black3 <- t(sigtab_black2)
+# head(sigtab_black3)
+# head(Metadata2)
+# sigtab_black4 <- merge(Metadata2,sigtab_black3,by="row.names")
+# sigtab_black4 <- t(sigtab_black4)
+# dim(sigtab_black4)
+# 
+# write.csv(sigtab_black4,"module_black_all.csv",quote=F)
+```
+
 
 Heatmaps-- WOOHOO!
 
@@ -654,7 +751,7 @@ dev.off()
 
 Module eigengene -  MEs boxplots by treatment group
 ```{r}
-# MEs_table             <- MEs # new table for plotting 
+# MEs_table             <- MEs # new table for plotting
 # MEs_table$sample <- rownames(MEs) # call rows as coolumn to merge with treatment data
 # MEsPlotting           <- merge(treatment_data, MEs_table, by = 'sample') # merge
 # MEsPlotting2           <- MEsPlotting[,-5] # ommit the library column
@@ -664,7 +761,7 @@ Module eigengene -  MEs boxplots by treatment group
 # #plot it
 # png("outputs/ME_Boxplot.png", 600, 1000, pointsize=20)
 # ggplot(MEsPlotting_melt, aes(x=effluent, y=value, fill = factor(pCO2), shape=pCO2)) +
-#           geom_boxplot(aes(middle = mean(value)), position=position_dodge(0.8), outlier.size = 0, alpha = 0.5) + 
+#           geom_boxplot(aes(middle = mean(value)), position=position_dodge(0.8), outlier.size = 0, alpha = 0.5) +
 #           stat_summary(fun = mean, color = "black", position = position_dodge(0.75),
 #                        geom = "point", shape = 19, size = 3,
 #                        show.legend = FALSE) +
@@ -673,7 +770,7 @@ Module eigengene -  MEs boxplots by treatment group
 #           scale_fill_manual(values=c("#56B4E9","#D55E00")) +
 #           geom_hline(yintercept=0, linetype='dotted', col = 'black', size = 1)+
 #           theme_bw() +
-#           theme(legend.position = "none") 
+#           theme(legend.position = "none")
 #           facet_wrap(~variable)
 # dev.off()
 ```
