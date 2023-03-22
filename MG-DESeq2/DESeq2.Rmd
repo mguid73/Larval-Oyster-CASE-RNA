@@ -227,7 +227,7 @@ ordered_sig_CA <-sig_CA[ order(sig_CA$padj ), ]
 ordered_sig_SE <-sig_SE[ order( sig_SE$padj ), ]
 ordered_sig_CASE <-sig_CASE[ order( sig_CASE$padj ), ]
 
-#these ordered lists were written to files for potential later use
+#these ordered lists were written to files for potential later use - like with gProfiler
 # write.table(ordered_sig_CA,"outputs/ordered_sig_CA.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
 # write.table(ordered_sig_SE,"outputs/ordered_sig_SE.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
 # write.table(ordered_sig_CASE,"outputs/ordered_sig_CASE.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")

@@ -486,13 +486,14 @@ moduleTraitPvalue_CASE
 ```
 
 ```{r}
-row.names(dds4) = dds4$X
-dds4$X = NULL
 dds5 = as.data.frame((dds4))
 dim(dds5) 
 module_grey_genes <- names(dds5)[moduleColors=="grey"]
 
-write.csv(module_grey_genes, "module_grey_genes.csv", quote=F)
+write.csv(module_grey_genes, "Module_grey_GO/module_grey_genes.csv", quote=F, row.names = FALSE)
+
+## make sure the csv is just a list of genes (no row or column names)
+## and use it in GO-term-prep.md
 ```
 
 Hub genes -- this did not do what I wanted it to...
