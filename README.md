@@ -1,11 +1,24 @@
 ## RNASeq Analysis for Coastal Acidification, Sewage Effluent, and Multiple Stressors on Eastern Oyster Larvae -- [The Puritz Lab of Marine Evolutionary Ecology](http://www.marineevoeco.com/)
 
+**Funding**
+
+NSF (to KEL)\
+DEB 1635423\
+DBI 1722553\
+RI Sea Grant (JBP)\
+USDA-NIFA Hatch Program RI0019-H020 (JBP)
+
+
 ![poster](images/Guidry_poster.png)
 
 
-### Go terms
+**Gene Onotology (GO) term full lists**
 
-****
+**[SE](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/MG-DESeq2/gProfiler/gProfiler_SE_output.csv)**
+
+**[CASE](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/MG-DESeq2/gProfiler/gProfiler_uniquetoCASE_output.csv)**
+
+**[Module grey](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/2023_WGCNA_MG/Module_grey_GO/gProfiler_modulegrey_output.csv)**
 
 
 **The Rational Behind Studying Multiple Stressors**  
@@ -49,14 +62,13 @@ The larvae were then filtered out of their experimental bottles and flash frozen
 - Converting [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml) output into a transcript count matrix for [DESeq2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#contrasts)
 - [DESeq2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#contrasts) to visualize data and look at log2 fold changes in expression levels between the treatments and control
 - [WGCNA](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-559) to identify clusters of highly correlated genes, describe module characteristics, and relate modules to each other and sample metadata.
-
-For this project, WGCNA may help to tease out interesting clusters of genes and how they relate to the individual and coupled stress treatments. In this *case* (pun intended), it will be interesting to see the spread of module associations with the two separate stress treatments (CA and SE) and the coupled treatment (CASE). This analysis may reveal synergystic interactions of the coupled stress treatments on select gene clusters that don't appear in the individual stress treatments.
+- [g:Profiler](https://biit.cs.ut.ee/gprofiler_beta/gost) for an initial functional enrichment analysis.
 
 
 **Quick Navagation**  
 
-- Read QC, trimming, alignment, and transcript assembly are in the [Guidry_CASE-RNASeq-Analysis.md]() file.  
+- Read QC, trimming, alignment, and transcript assembly are in the [Guidry_CASE-RNASeq-Analysis.md](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/Guidry_CASE-RNA-Analysis.md) file.  
 - StringTie output file conversion into gene count matrixes for DESeq2 is with [prepDE.py](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/scripts/prepDE.py), this script is from [here](https://github.com/gpertea/stringtie/blob/master/prepDE.py).
-- Differential expression analysis is in the [DESeq2.md]() along with all code for making figures.   
-- Weighted Correlation Network Analysis (WGCNA) is in [WGCNA_CASE.R]().
-- gProfiler analysis for [DEGs in each treatment group]() and [WGCNA modules]().
+- Differential expression analysis is in the [DESeq2.md](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/MG-DESeq2/DESeq2.md) along with all code for making figures.   
+- Weighted Correlation Network Analysis (WGCNA) is in [WGCNA_CASE.Rmd](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/2023_WGCNA_MG/WGCNA_CASE.Rmd).
+- gProfiler analysis for [DEGs in each treatment group](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/MG-DESeq2/gProfiler/GO-term-prep.md) and [WGCNA modules](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/2023_WGCNA_MG/Module_grey_GO/gProfiler.md).
