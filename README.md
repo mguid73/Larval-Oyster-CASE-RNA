@@ -1,5 +1,13 @@
 ## RNASeq Analysis for Coastal Acidification, Sewage Effluent, and Multiple Stressors on Eastern Oyster Larvae -- [The Puritz Lab of Marine Evolutionary Ecology](http://www.marineevoeco.com/)
 
+![poster](images/Guidry_poster.png)
+
+
+### Go terms
+
+****
+
+
 **The Rational Behind Studying Multiple Stressors**  
 
 Over 50% of the population of the United States of America and over 60% of the population of
@@ -33,27 +41,22 @@ During the summer of 2017, exposure trials were conducted using larvae from the 
 
 The larvae were then filtered out of their experimental bottles and flash frozen to preserve the DNA and RNA. For this project RNA extracted from 1 replicate block of CA, CON, SE, and CASE treatments (14 samples, 4 CA, 3 SE, 3 CON, and 4 CASE) were prepped with the [KAPA Biosystems Stranded mRNA Seq kit](https://www.kapabiosystems.com/product-applications/products/next-generation-sequencing-2/rna-library-preparation-2/kapa-stranded-mrna-seq-kits/) and sequenced with one Full HiSeq lane from [Novogene](https://en.novogene.com/).
 
-**Steps of Analysis:**
+**Analysis steps:**
 - Looking at read counts
 - QC, visualization, and trimming of reads  
 - Using [HISAT2](https://ccb.jhu.edu/software/hisat2/index.shtml) to align reads to the Eastern Oyster genome
 - Using [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml) to assemble alignments to transcripts with the Eastern Oyster annotation file
 - Converting [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml) output into a transcript count matrix for [DESeq2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#contrasts)
-- Using [DESeq2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#contrasts) to visualize data and look at log2 fold changes in expression levels between the treatments and control
-- Rank-based Gene Ontology analysis of gene expression data with [GO_MWU](https://github.com/z0on/GO_MWU)
+- [DESeq2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#contrasts) to visualize data and look at log2 fold changes in expression levels between the treatments and control
+- [WGCNA](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-559) to identify clusters of highly correlated genes, describe module characteristics, and relate modules to each other and sample metadata.
+
+For this project, WGCNA may help to tease out interesting clusters of genes and how they relate to the individual and coupled stress treatments. In this *case* (pun intended), it will be interesting to see the spread of module associations with the two separate stress treatments (CA and SE) and the coupled treatment (CASE). This analysis may reveal synergystic interactions of the coupled stress treatments on select gene clusters that don't appear in the individual stress treatments.
 
 
 **Quick Navagation**  
 
-- Read QC, trimming, alignment, and transcript assembly are in the [CASE-RNASeq-Analysis.md](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/CASE-RNA-Analysis.md) file.  
-- Outputs from those programs are in the [outputs](https://github.com/meschedl/Larval-Oyster-CASE-RNA/tree/master/outputs) folder.  
-- StringTie output file conversion into gene count matrixes for DESeq2 is with [prepDE.py](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/scripts/prepDE.py), this script is from [here](https://github.com/gpertea/stringtie/blob/master/prepDE.py).
-- Differential expression analysis is in the [DESeq2_CASE_RNA.md](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/DESeq2_CASE_RNA.md) along with all code for making figures.   
-- Preparation of p-values for GO_MWU is in the [Signed-Neg-Log-Pvalue.R](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/scripts/Signed-Neg-Log-Pvalue.R) script.
-- Preparation of results files and GO terms with the [GO_MWU_Prep.md](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/scripts/GO_MWU_Prep.md) markdown.
-- Other scripts for GO_MWU are also in the [scripts](https://github.com/meschedl/Larval-Oyster-CASE-RNA/tree/master/scripts) folder, and are available from the source [here](https://github.com/z0on/GO_MWU)
-- [GO_MWR.R](https://github.com/meschedl/Larval-Oyster-CASE-RNA/blob/master/scripts/GO_MWU.R) including the files from this analysis.
-
-**Poster from the Evolution Meeting 2019**
-
-![poster](images/MESEvoPoster2019.jpg)
+- Read QC, trimming, alignment, and transcript assembly are in the [Guidry_CASE-RNASeq-Analysis.md]() file.  
+- StringTie output file conversion into gene count matrixes for DESeq2 is with [prepDE.py](https://github.com/mguid73/Larval-Oyster-CASE-RNA/blob/master/scripts/prepDE.py), this script is from [here](https://github.com/gpertea/stringtie/blob/master/prepDE.py).
+- Differential expression analysis is in the [DESeq2.md]() along with all code for making figures.   
+- Weighted Correlation Network Analysis (WGCNA) is in [WGCNA_CASE.R]().
+- gProfiler analysis for [DEGs in each treatment group]() and [WGCNA modules]().

@@ -79,6 +79,9 @@ grep -xFv -f unique_SEloc.csv sharedby_CA_CASE > sharedby_CA_CASE_uniq.csv
 ```
 There are 182 LOCs shared by CA and CASE that arent also in SE
 
+gProfiler output: `gProfiler_shared_CAandCASE.csv` 
+Nothing really significant or super interesting in here at first glance
+
 
 ## GO terms shared by SE and CASE but not in CA
 ```
@@ -86,6 +89,8 @@ grep -xF -f unique_SEloc.csv unique_CASEloc.csv | uniq > sharedby_SE_CASE
 grep -xFv -f unique_CAloc.csv sharedby_SE_CASE > sharedby_SE_CASE_uniq.csv
 ```
 There are 43 LOCs shared by SE and CASE that arent also in CA
+gProfiler output: `gProfiler_shared_SEandCASE.csv`
+
 
 ## GO terms in CASE but not in CA and SE
 ```
@@ -94,6 +99,8 @@ grep -xFv -f sharedby_CA_SE unique_CASEloc.csv > unique_to_CASE.csv
 355 LOCs in CASE but not in CA and SE
 
 **Summary: There are GO terms associated with electron transfer, phenylalanine metabolism, steriod/hormone metabolism/activity**
+
+terms of interest from `gProfiler_uniquetoCASE_output.csv`
 
 - "GO:MF","oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxygen, reduced pteridine as one donor, and incorporation of one atom of oxygen","GO:0016714"
 - "GO:MF","phenylalanine 4-monooxygenase activity","GO:0004505"
